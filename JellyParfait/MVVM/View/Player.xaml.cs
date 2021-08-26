@@ -136,8 +136,8 @@ namespace JellyParfait.MVVM.View
             get => (PlayerState)GetValue(StateProperty);
             set
             {
-                SetValue(StateProperty, value);
                 IsPlaying = value == PlayerState.Playing;
+                SetValue(StateProperty, value);
             }
         }
 
@@ -148,12 +148,13 @@ namespace JellyParfait.MVVM.View
         }
         #endregion
 
-        public event EventHandler<StoppedEventArgs> PlayerStopped;
+        public event EventHandler<PlayerStoppedEventArgs> PlayerStopped;
 
         public ICommand PlayCommand { get; }
 
         private Model.MusicPlayer _MusicPlayer = null;
         private DispatcherTimer _Timer = null;
+        private CausedStop _LastCausedStop;
         
         public Player()
         {
@@ -204,6 +205,7 @@ namespace JellyParfait.MVVM.View
                 return;
 
             _Timer.Stop();
+            _LastCausedStop = CausedStop.CallStop;
             _MusicPlayer.Stop();
         }
 
@@ -233,15 +235,20 @@ namespace JellyParfait.MVVM.View
             var state = (PlayerState)args.NewValue;
             if(state == PlayerState.Stopped)
             {
-                player.PlayerStopped?.Invoke(player, new StoppedEventArgs());
+                player.PlayerStopped?.Invoke(player, new PlayerStoppedEventArgs { CausedStop = player._LastCausedStop });
             }
         }
 
         private static void OnMusicChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
             var player = sender as Player;
-            if(player._MusicPlayer != null)
+            
+            if(player.IsPlaying)
             {
+                player._MusicPlayer.PlaybackStopped -= player.OnStopped;
+                player.Stop();
+                player._LastCausedStop = CausedStop.ChangeMusic;
+                player.State = PlayerState.Stopped;
                 player._MusicPlayer.Dispose();
                 player._MusicPlayer = null;
             }
@@ -260,6 +267,7 @@ namespace JellyParfait.MVVM.View
 
         private void OnStopped(object sender, StoppedEventArgs args)
         {
+            _LastCausedStop = CausedStop.EndMusic;
             State = PlayerState.Stopped;
         }
     }

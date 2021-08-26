@@ -21,10 +21,23 @@ namespace JellyParfait.MVVM.ViewModel
         bool IsPlaying { get; }
         Music Music { get; set; }
 
-        event EventHandler<StoppedEventArgs> PlayerStopped;
+        event EventHandler<PlayerStoppedEventArgs> PlayerStopped;
 
         void Play();
         void Pause();
         void Stop();
+    }
+
+    public enum CausedStop
+    {
+        Unknown,
+        EndMusic,
+        ChangeMusic,
+        CallStop,
+    }
+
+    public class PlayerStoppedEventArgs : EventArgs
+    {
+        public CausedStop CausedStop { get; init; }
     }
 }
