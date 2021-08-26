@@ -181,9 +181,8 @@ namespace JellyParfait.MVVM.ViewModel
 
         private async Task<IEnumerable<string>> FetchPlaylist(string url)
         {
-            var playlist = await _Client.Playlists.GetAsync(url);
             var download = new List<string>();
-            await foreach (var video in _Client.Playlists.GetVideosAsync(playlist.Id))
+            await foreach (var video in _Client.Playlists.GetVideosAsync(url))
             {
                 //TODO: ShowYesNo
                 download.Add(video.Url);
