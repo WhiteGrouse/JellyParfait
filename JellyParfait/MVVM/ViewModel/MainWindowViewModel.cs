@@ -91,9 +91,7 @@ namespace JellyParfait.MVVM.ViewModel
                 if(SelectedIndex + 1 < Playlist.Count)
                 {
                     Playlist[SelectedIndex].Index += 1;
-                    _PlayNext = true;
                     SelectedIndex += 1;
-                    _PlayNext = false;
                 }
             });
 
@@ -171,7 +169,9 @@ namespace JellyParfait.MVVM.ViewModel
         {
             if(args.CausedStop == CausedStop.EndMusic)
             {
+                _PlayNext = true;
                 NextCommand.Execute(null);
+                _PlayNext = false;
             }
         }
 

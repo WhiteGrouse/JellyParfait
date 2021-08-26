@@ -189,7 +189,8 @@
             x:Name="Player"
             DockPanel.Dock="Bottom" Margin="0, 5, 0, 0"
             WithPlaylist="True"
-            PrevCommand="{Binding PrevCommand}" NextCommand="{Binding NextCommand}"/>
+            PrevCommand="{Binding DataContext.PrevCommand, Mode=OneWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}"
+            NextCommand="{Binding DataContext.NextCommand, Mode=OneWay, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}"/>
 
         <ListView
             BorderBrush="#cccccc"
