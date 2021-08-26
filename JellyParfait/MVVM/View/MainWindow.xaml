@@ -53,7 +53,7 @@
                     <Image Source="pack://application:,,,/JellyParfait;component/Resources/QuereDown.png"/>
                 </Button>
 
-                <Image Grid.Column="3" Style="{StaticResource StatusIconStyle}"/>
+                <!--<Image Grid.Column="3" Style="{StaticResource StatusIconStyle}"/>-->
 
                 <TextBlock
                     Grid.Column="4"

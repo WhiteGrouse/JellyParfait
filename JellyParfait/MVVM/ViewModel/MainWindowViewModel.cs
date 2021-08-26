@@ -67,6 +67,7 @@ namespace JellyParfait.MVVM.ViewModel
         public ICommand AddPlaylistCommand { get; }
 
         private YoutubeClient _Client;
+        private bool _PlayNext = false;
 
         public MainWindowViewModel(IDialogCoordinator dialog, IPlayer player)
         {
@@ -90,9 +91,10 @@ namespace JellyParfait.MVVM.ViewModel
                 if(SelectedIndex + 1 < Playlist.Count)
                 {
                     Playlist[SelectedIndex].Index += 1;
+                    _PlayNext = true;
                     SelectedIndex += 1;
+                    _PlayNext = false;
                 }
-                _AutoPlay = false;
             });
 
             ForwardCommand = new RelayCommand<int>(index =>
@@ -152,15 +154,21 @@ namespace JellyParfait.MVVM.ViewModel
             }
             else
             {
+                var playing = vm.Player.IsPlaying;
                 vm.Player.Music = vm.Playlist[index].Music;
+                if (playing || vm._PlayNext)
+                {
+                    vm.Player.Play();
+                }
             }
         }
 
-        private void OnPlayerStopped(object sender, StoppedEventArgs args)
+        private void OnPlayerStopped(object sender, PlayerStoppedEventArgs args)
         {
-            //再生中の曲が削除された
-            //曲が終わった
-            //曲を切り替えられた
+            if(args.CausedStop == CausedStop.EndMusic)
+            {
+                NextCommand.Execute(null);
+            }
         }
 
         private async Task<IEnumerable<string>> FetchMusic(string url)
