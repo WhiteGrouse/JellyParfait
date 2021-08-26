@@ -121,6 +121,10 @@ namespace JellyParfait.MVVM.ViewModel
                 {
                     musicWrap.Index -= 1;
                 }
+                if(SelectedIndex == index)
+                {
+                    NextCommand.Execute(null);
+                }
                 Playlist.RemoveAt(index);
             });
 
@@ -152,7 +156,7 @@ namespace JellyParfait.MVVM.ViewModel
             {
                 vm.Player.Music = null;
             }
-            else
+            else if(vm.Player.Music != vm.Playlist[index].Music)
             {
                 var playing = vm.Player.IsPlaying;
                 vm.Player.Music = vm.Playlist[index].Music;
