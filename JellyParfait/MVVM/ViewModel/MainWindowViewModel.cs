@@ -82,7 +82,6 @@ namespace JellyParfait.MVVM.ViewModel
             {
                 if(SelectedIndex > 0)
                 {
-                    Playlist[SelectedIndex].Index -= 1;
                     SelectedIndex -= 1;
                 }
             });
@@ -90,7 +89,6 @@ namespace JellyParfait.MVVM.ViewModel
             {
                 if(SelectedIndex + 1 < Playlist.Count)
                 {
-                    Playlist[SelectedIndex].Index += 1;
                     SelectedIndex += 1;
                 }
             });
