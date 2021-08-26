@@ -11,7 +11,7 @@
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
-        <conv:TiemSpanConverter x:Key="TimeSpanConverter"/>
+        <conv:TimeSpanConverter x:Key="TimeSpanConverter"/>
     </UserControl.Resources>
     
     <Grid>
