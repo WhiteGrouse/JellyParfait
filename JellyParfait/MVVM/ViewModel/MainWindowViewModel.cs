@@ -92,6 +92,10 @@ namespace JellyParfait.MVVM.ViewModel
                 {
                     SelectedIndex += 1;
                 }
+                else if (Player.Loop)
+                {
+                    SelectedIndex = 0;
+                }
             });
 
             ForwardCommand = new RelayCommand<int>(index =>
