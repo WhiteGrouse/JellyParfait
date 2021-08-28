@@ -15,7 +15,11 @@ namespace JellyParfait.MVVM.Model
         private AudioFileReader _Stream = null;
 
         public PlaybackState State => _Device.PlaybackState;
-        public TimeSpan Current => _Stream.CurrentTime;
+        public TimeSpan Current
+        {
+            get => _Stream.CurrentTime;
+            set => _Stream.CurrentTime = value;
+        }
         public TimeSpan Total => _Stream.TotalTime;
 
         public event EventHandler<StoppedEventArgs> PlaybackStopped

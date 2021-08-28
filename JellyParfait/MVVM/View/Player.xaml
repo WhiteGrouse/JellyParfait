@@ -12,6 +12,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
         <conv:TimeSpanConverter x:Key="TimeSpanConverter"/>
+        <conv:SecondsConverter x:Key="SecondsConverter"/>
     </UserControl.Resources>
     
     <Grid>
@@ -31,18 +32,20 @@
 
             <Label
                 Grid.Column="1"
-                Content="{Binding Current, Converter={StaticResource TimeSpanConverter}}"
+                Content="{Binding Elapsed, Converter={StaticResource SecondsConverter}}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"/>
 
             <Slider
+                x:Name="seekbar"
                 Grid.Column="2"
-                Value="{Binding Elapsed}"
-                Minimum="0" Maximum="{Binding TotalSec}"/>
+                Value="{Binding Elapsed, Mode=TwoWay}"
+                Minimum="0" Maximum="{Binding TotalSec}"
+                IsMoveToPointEnabled="True"/>
 
             <Label
                 Grid.Column="3"
-                Content="{Binding Total, Converter={StaticResource TimeSpanConverter}}"
+                Content="{Binding TotalSec, Converter={StaticResource SecondsConverter}}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"/>
         </Grid>
