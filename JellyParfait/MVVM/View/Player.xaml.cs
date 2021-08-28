@@ -37,12 +37,6 @@ namespace JellyParfait.MVVM.View
         public static readonly DependencyProperty MusicProperty =
             DependencyProperty.Register("Music", typeof(Music), typeof(Player), new UIPropertyMetadata(null, OnMusicChanged));
 
-        public static readonly DependencyProperty CurrentProperty =
-            DependencyProperty.Register("Current", typeof(TimeSpan), typeof(Player), new UIPropertyMetadata(TimeSpan.Zero));
-
-        public static readonly DependencyProperty TotalProperty =
-            DependencyProperty.Register("Total", typeof(TimeSpan), typeof(Player), new UIPropertyMetadata(TimeSpan.Zero));
-
         public static readonly DependencyProperty TotalSecProperty =
             DependencyProperty.Register("TotalSec", typeof(int), typeof(Player), new UIPropertyMetadata(0));
 
@@ -76,18 +70,6 @@ namespace JellyParfait.MVVM.View
         {
             get => (Music)GetValue(MusicProperty);
             set => SetValue(MusicProperty, value);
-        }
-
-        public TimeSpan Current
-        {
-            get => (TimeSpan)GetValue(CurrentProperty);
-            private set => SetValue(CurrentProperty, value);
-        }
-
-        public TimeSpan Total
-        {
-            get => (TimeSpan)GetValue(TotalProperty);
-            private set => SetValue(TotalProperty, value);
         }
 
         public int TotalSec
@@ -237,17 +219,13 @@ namespace JellyParfait.MVVM.View
         {
             if(_MusicPlayer == null)
             {
-                Current = TimeSpan.Zero;
-                Total = TimeSpan.Zero;
                 Elapsed = 0;
                 TotalSec = 0;
             }
             else
             {
-                Current = _MusicPlayer.Current;
-                Total = _MusicPlayer.Total;
-                Elapsed = (int)Current.TotalSeconds;
-                TotalSec = (int)Total.TotalSeconds;
+                Elapsed = (int)_MusicPlayer.Current.TotalSeconds;
+                TotalSec = (int)_MusicPlayer.Total.TotalSeconds;
             }
         }
 

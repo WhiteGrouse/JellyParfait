@@ -11,8 +11,6 @@ namespace JellyParfait.MVVM.ViewModel
 {
     public interface IPlayer
     {
-        TimeSpan Current { get; }
-        TimeSpan Total { get; }
         int TotalSec { get; }
         int Elapsed { get; }
         bool Loop { get; set; }
