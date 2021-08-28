@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using YoutubeExplode;
+using YoutubeExplode.Converter;
 using YoutubeExplode.Videos.Streams;
 
 namespace JellyParfait.MVVM.ViewModel
@@ -199,13 +200,11 @@ namespace JellyParfait.MVVM.ViewModel
                 foreach (var (url, i) in playlist.Select((url, i) => (url, i)))
                 {
                     var video = await _Client.Videos.GetAsync(url);
-                    var path = $"{cachePath}{video.Id}.m4a";
+                    var path = $"{cachePath}{video.Id}.mp3";
 
                     if (!File.Exists(path))
                     {
-                        var manifest = await _Client.Videos.Streams.GetManifestAsync(video.Id);
-                        var info = manifest.GetAudioOnlyStreams().GetWithHighestBitrate();
-                        await _Client.Videos.Streams.DownloadAsync(info, path);
+                        await _Client.Videos.DownloadAsync(url, path);
                     }
 
                     Playlist.Add(new MusicWrap
