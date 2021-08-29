@@ -22,6 +22,12 @@ namespace JellyParfait.MVVM.Model
         }
         public TimeSpan Total => _Stream.TotalTime;
 
+        public float Volume
+        {
+            get => _Device.Volume;
+            set => _Device.Volume = Math.Clamp(value, 0f, 1f);
+        }
+
         public event EventHandler<StoppedEventArgs> PlaybackStopped
         {
             add => _Device.PlaybackStopped += value;

@@ -49,6 +49,9 @@ namespace JellyParfait.MVVM.View
         public static readonly DependencyProperty ShuffleProperty =
             DependencyProperty.Register("Shuffle", typeof(bool), typeof(Player), new UIPropertyMetadata(false));
 
+        private static readonly DependencyProperty VolumeProperty =
+            DependencyProperty.Register("Volume", typeof(double), typeof(Player), new UIPropertyMetadata(1.0));
+
         public static readonly DependencyProperty WithPlaylistProperty =
             DependencyProperty.Register("WithPlaylist", typeof(bool), typeof(Player), new UIPropertyMetadata(false));
 
@@ -94,6 +97,12 @@ namespace JellyParfait.MVVM.View
         {
             get => (bool)GetValue(ShuffleProperty);
             set => SetValue(ShuffleProperty, value);
+        }
+
+        public double Volume
+        {
+            get => (double)GetValue(VolumeProperty);
+            set => SetValue(VolumeProperty, value);
         }
 
         public bool WithPlaylist
@@ -306,6 +315,14 @@ namespace JellyParfait.MVVM.View
             {
                 Play();
             }
+        }
+
+        private static void OnVolumeChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            var player = sender as Player;
+
+            var volume = (double)args.NewValue;
+            player._MusicPlayer.Volume = (float)args.NewValue;
         }
     }
 }
