@@ -3,20 +3,9 @@ using JellyParfait.MVVM.Model;
 using JellyParfait.MVVM.ViewModel;
 using NAudio.Wave;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace JellyParfait.MVVM.View
@@ -50,7 +39,7 @@ namespace JellyParfait.MVVM.View
             DependencyProperty.Register("Shuffle", typeof(bool), typeof(Player), new UIPropertyMetadata(false));
 
         private static readonly DependencyProperty VolumeProperty =
-            DependencyProperty.Register("Volume", typeof(double), typeof(Player), new UIPropertyMetadata(1.0));
+            DependencyProperty.Register("Volume", typeof(double), typeof(Player), new UIPropertyMetadata(1.0, OnVolumeChanged));
 
         public static readonly DependencyProperty WithPlaylistProperty =
             DependencyProperty.Register("WithPlaylist", typeof(bool), typeof(Player), new UIPropertyMetadata(false));
@@ -144,12 +133,12 @@ namespace JellyParfait.MVVM.View
 
         public ICommand PlayCommand { get; }
 
-        private Model.MusicPlayer _MusicPlayer = null;
+        private MusicPlayer _MusicPlayer = null;
         private DispatcherTimer _Timer = null;
         private CausedStop _LastCausedStop;
         private bool _Seeking = false;
         private bool _PlayAfterEdit;
-        
+
         public Player()
         {
             InitializeComponent();
@@ -171,34 +160,13 @@ namespace JellyParfait.MVVM.View
             });
 
             DataContext = this;
-
-            seekbar.ApplyTemplate();
-            var trackElement = seekbar.Template.FindName("PART_Track", seekbar) as Track;
-            trackElement.Thumb.MouseEnter += new MouseEventHandler((sender, e) =>
-            {
-                if(e.LeftButton == MouseButtonState.Pressed && e.MouseDevice.Captured == null)
-                {
-                    var args = new MouseButtonEventArgs(e.MouseDevice, e.Timestamp, MouseButton.Left);
-                    args.RoutedEvent = MouseLeftButtonDownEvent;
-                    (sender as Thumb).RaiseEvent(args);
-                }
-            });
-            trackElement.Thumb.GotMouseCapture += new MouseEventHandler(OnSeekStart);
-            trackElement.Thumb.LostMouseCapture += new MouseEventHandler(OnSeekEnd);
-            seekbar.PreviewMouseDown += (sender, e) =>
-            {
-                if (e.ChangedButton == MouseButton.Left)
-                {
-                    _Timer.Stop();
-                }
-            };
         }
 
         public void Play()
         {
             if (_MusicPlayer == null || _MusicPlayer.State == PlaybackState.Playing)
                 return;
-            
+
             _MusicPlayer.Play();
             _Timer.Start();
             State = PlayerState.Playing;
@@ -208,7 +176,7 @@ namespace JellyParfait.MVVM.View
         {
             if (_MusicPlayer == null || _MusicPlayer.State != PlaybackState.Playing)
                 return;
-            
+
             _MusicPlayer.Pause();
             _Timer.Stop();
             State = PlayerState.Paused;
@@ -226,7 +194,7 @@ namespace JellyParfait.MVVM.View
 
         private void UpdateTime()
         {
-            if(_MusicPlayer == null)
+            if (_MusicPlayer == null)
             {
                 Elapsed = 0;
                 TotalSec = 0;
@@ -247,7 +215,7 @@ namespace JellyParfait.MVVM.View
             }
 
             var state = (PlayerState)args.NewValue;
-            if(state == PlayerState.Stopped)
+            if (state == PlayerState.Stopped)
             {
                 player.PlayerStopped?.Invoke(player, new PlayerStoppedEventArgs { CausedStop = player._LastCausedStop });
             }
@@ -256,8 +224,8 @@ namespace JellyParfait.MVVM.View
         private static void OnMusicChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
             var player = sender as Player;
-            
-            if(player.IsPlaying)
+
+            if (player.IsPlaying)
             {
                 player._MusicPlayer.PlaybackStopped -= player.OnStopped;
                 player.Stop();
@@ -267,15 +235,16 @@ namespace JellyParfait.MVVM.View
                 player._MusicPlayer = null;
             }
 
-            if(args.NewValue == null)
+            if (args.NewValue == null)
             {
                 player.UpdateTime();
                 return;
             }
 
             var music = args.NewValue as Music;
-            player._MusicPlayer = new Model.MusicPlayer(music.AudioPath);
+            player._MusicPlayer = new MusicPlayer(music.AudioPath);
             player._MusicPlayer.PlaybackStopped += player.OnStopped;
+            player._MusicPlayer.Volume = (float)player.Volume;
             player.UpdateTime();
         }
 
@@ -285,7 +254,19 @@ namespace JellyParfait.MVVM.View
             State = PlayerState.Stopped;
         }
 
-        private void OnSeekStart(object sender, MouseEventArgs e)
+        private void OnSeekStartBefore(object sender, MouseButtonEventArgs e)
+        {
+            //IsMoveToPointEnabledでつまみがクリックした位置に移動するが、タイマーによる更新で戻ってしまう可能性があるため
+            //つまみを移動する処理(SliderのPreviewMouseLeftDown)より前に発火するイベントでタイマーを止める
+            //PreviewMouseDown -> PreviewMouseLeftDown
+            //https://github.com/dotnet/wpf/blob/89d172db0b7a192de720c6cfba5e28a1e7d46123/src/Microsoft.DotNet.Wpf/src/PresentationFramework/System/Windows/Controls/Slider.cs#L766-L788
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                _Timer.Stop();
+            }
+        }
+
+        private void OnSeekStart(object sender, RoutedEventArgs e)
         {
             if (_MusicPlayer == null)
                 return;
@@ -303,7 +284,7 @@ namespace JellyParfait.MVVM.View
             }
         }
 
-        private void OnSeekEnd(object sender, MouseEventArgs e)
+        private void OnSeekEnd(object sender, RoutedEventArgs e)
         {
             if (_MusicPlayer == null)
                 return;
@@ -322,7 +303,10 @@ namespace JellyParfait.MVVM.View
             var player = sender as Player;
 
             var volume = (double)args.NewValue;
-            player._MusicPlayer.Volume = (float)args.NewValue;
+            if (player._MusicPlayer != null)
+            {
+                player._MusicPlayer.Volume = (float)volume;
+            }
         }
     }
 }
